@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>디지털 명함 생성기</title>
+  <title>오다빈 - JB.E 기업지원센터</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,7 +26,6 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.13);
     }
 
-    /* 상단 헤더 */
     .card-header {
       background: #fff;
       padding: 32px 28px 20px;
@@ -37,8 +36,6 @@
       gap: 16px;
     }
 
-    .header-left {}
-
     .company-name {
       font-size: 1.5rem;
       font-weight: 800;
@@ -46,9 +43,7 @@
       letter-spacing: -0.5px;
     }
 
-    .company-name span {
-      color: #e8a020;
-    }
+    .company-name span { color: #e8a020; }
 
     .divider-line {
       width: 100%;
@@ -71,7 +66,6 @@
       flex-shrink: 0;
     }
 
-    /* 이름/직함 영역 */
     .card-person {
       padding: 20px 28px;
       display: flex;
@@ -81,9 +75,7 @@
       background: #fafbfd;
     }
 
-    .person-info {
-      text-align: right;
-    }
+    .person-info { text-align: right; }
 
     .department {
       font-size: 0.82rem;
@@ -98,7 +90,6 @@
       letter-spacing: 6px;
     }
 
-    /* 연락처 영역 */
     .card-contacts {
       padding: 20px 28px;
       display: flex;
@@ -118,9 +109,7 @@
       text-decoration: none;
     }
 
-    .contact-item:hover {
-      background: #f0f4f8;
-    }
+    .contact-item:hover { background: #f0f4f8; }
 
     .contact-icon {
       width: 32px;
@@ -145,9 +134,7 @@
       font-weight: 600;
     }
 
-    .contact-address .contact-icon {
-      background: #e8a020;
-    }
+    .contact-address .contact-icon { background: #e8a020; }
 
     .contact-address .contact-text {
       color: #444;
@@ -155,7 +142,6 @@
       font-size: 0.92rem;
     }
 
-    /* 복사 토스트 */
     .toast {
       position: fixed;
       bottom: 32px;
@@ -177,7 +163,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* 전화 액션 모달 */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -188,9 +173,7 @@
       justify-content: center;
     }
 
-    .modal-overlay.show {
-      display: flex;
-    }
+    .modal-overlay.show { display: flex; }
 
     .modal {
       background: #fff;
@@ -203,7 +186,7 @@
 
     @keyframes slideUp {
       from { transform: translateY(100%); }
-      to { transform: translateY(0); }
+      to   { transform: translateY(0); }
     }
 
     .modal-title {
@@ -221,10 +204,7 @@
       margin-bottom: 24px;
     }
 
-    .modal-btns {
-      display: flex;
-      gap: 12px;
-    }
+    .modal-btns { display: flex; gap: 12px; }
 
     .modal-btn {
       flex: 1;
@@ -238,23 +218,10 @@
     }
 
     .modal-btn:hover { opacity: 0.85; }
+    .btn-call   { background: #1a3a6b; color: #fff; }
+    .btn-copy   { background: #f0f4f8; color: #1a3a6b; }
+    .btn-cancel { background: #eee; color: #666; }
 
-    .btn-call {
-      background: #1a3a6b;
-      color: #fff;
-    }
-
-    .btn-copy {
-      background: #f0f4f8;
-      color: #1a3a6b;
-    }
-
-    .btn-cancel {
-      background: #eee;
-      color: #666;
-    }
-
-    /* 하단 배너 */
     .card-banner {
       background: #1a3a6b;
       padding: 16px 28px;
@@ -263,9 +230,7 @@
       gap: 12px;
     }
 
-    .banner-icon {
-      font-size: 1.5rem;
-    }
+    .banner-icon { font-size: 1.5rem; }
 
     .banner-text {
       color: #e8a020;
@@ -277,8 +242,60 @@
 </head>
 <body>
 
-<!-- ===================== 카드 렌더링 ===================== -->
-<div class="card" id="nameCard"></div>
+<div class="card">
+  <div class="card-header">
+    <div class="header-left">
+      <div class="company-name">
+        <span>JB.E</span> 기업지원센터
+      </div>
+      <div class="divider-line"></div>
+      <div class="company-sub">기업 정책자금 전문 컨설팅</div>
+    </div>
+    <svg width="60" height="60" viewBox="0 0 60 60">
+        <rect width="60" height="60" rx="8" fill="#f0f4f8"/>
+        <rect x="10" y="35" width="8" height="15" rx="2" fill="#1a3a6b"/>
+        <rect x="22" y="25" width="8" height="25" rx="2" fill="#1a3a6b"/>
+        <rect x="34" y="15" width="8" height="35" rx="2" fill="#1a3a6b"/>
+        <polygon points="42,8 55,8 55,21" fill="#e8a020"/>
+        <line x1="38" y1="12" x2="55" y2="8" stroke="#e8a020" stroke-width="2.5"/>
+       </svg>
+  </div>
+
+  <div class="card-person">
+    <div class="person-info">
+      <div class="department">경영관리부 / 팀장</div>
+      <div class="person-name">오 다 빈</div>
+    </div>
+  </div>
+
+  <div class="card-contacts">
+    <div class="contact-item" onclick="openPhoneModal('010-4719-0634')">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+      </div>
+      <div class="contact-text">010-4719-0634</div>
+    </div>
+
+    <div class="contact-item" onclick="copyToClipboard('jb260330@naver.com', '이메일')">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <div class="contact-text">jb260330@naver.com</div>
+    </div>
+
+    <div class="contact-item contact-address">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      <div class="contact-text">대전 서구 둔산동 1015 6층</div>
+    </div>
+  </div>
+
+  <div class="card-banner">
+    <span class="banner-icon">👉</span>
+    <span class="banner-text">무료 정책자금 가능 여부 진단</span>
+  </div>
+</div>
 
 <!-- 전화 모달 -->
 <div class="modal-overlay" id="phoneModal">
@@ -286,8 +303,8 @@
     <div class="modal-title">전화 연결 또는 번호 복사</div>
     <div class="modal-number" id="modalNumber"></div>
     <div class="modal-btns">
-      <button class="modal-btn btn-call" id="btnCall">📞 전화걸기</button>
-      <button class="modal-btn btn-copy" id="btnCopyPhone">📋 번호복사</button>
+      <button class="modal-btn btn-call"   id="btnCall">📞 전화걸기</button>
+      <button class="modal-btn btn-copy"   id="btnCopyPhone">📋 번호복사</button>
       <button class="modal-btn btn-cancel" onclick="closeModal()">취소</button>
     </div>
   </div>
@@ -297,73 +314,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 카드 렌더링 ──────────────────────────────────────────
-function renderCard(data) {
-  const { company, person, contacts, banner } = data;
-
-  document.getElementById('nameCard').innerHTML = `
-    <div class="card-header">
-      <div class="header-left">
-        <div class="company-name">
-          <span>${company.name_prefix}</span> ${company.name_suffix}
-        </div>
-        <div class="divider-line"></div>
-        <div class="company-sub">${company.slogan}</div>
-      </div>
-      ${company.logo
-        ? `<img class="logo-img" src="${company.logo}" alt="logo"/>`
-        : `<svg width="60" height="60" viewBox="0 0 60 60">
-            <rect width="60" height="60" rx="8" fill="#f0f4f8"/>
-            <rect x="10" y="35" width="8" height="15" rx="2" fill="#1a3a6b"/>
-            <rect x="22" y="25" width="8" height="25" rx="2" fill="#1a3a6b"/>
-            <rect x="34" y="15" width="8" height="35" rx="2" fill="#1a3a6b"/>
-            <polygon points="42,8 55,8 55,21" fill="#e8a020"/>
-            <line x1="38" y1="12" x2="55" y2="8" stroke="#e8a020" stroke-width="2.5"/>
-           </svg>`
-      }
-    </div>
-
-    <div class="card-person">
-      <div class="person-info">
-        <div class="department">${person.department} / ${person.position}</div>
-        <div class="person-name">${person.name}</div>
-      </div>
-    </div>
-
-    <div class="card-contacts">
-      <div class="contact-item" onclick="openPhoneModal('${contacts.phone}')">
-        <div class="contact-icon">
-          <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-        </div>
-        <div class="contact-text">${contacts.phone}</div>
-      </div>
-
-      <div class="contact-item" onclick="copyToClipboard('${contacts.email}', '이메일')">
-        <div class="contact-icon">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        </div>
-        <div class="contact-text">${contacts.email}</div>
-      </div>
-
-      <div class="contact-item contact-address">
-        <div class="contact-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        </div>
-        <div class="contact-text">${contacts.address}</div>
-      </div>
-    </div>
-
-    <div class="card-banner">
-      <span class="banner-icon">${banner.icon}</span>
-      <span class="banner-text">${banner.text}</span>
-    </div>
-  `;
-}
-
-// ── 전화 모달 ────────────────────────────────────────────
 function openPhoneModal(phone) {
   document.getElementById('modalNumber').textContent = phone;
-  document.getElementById('btnCall').onclick = () => { window.location.href = `tel:${phone}`; closeModal(); };
+  document.getElementById('btnCall').onclick      = () => { window.location.href = 'tel:' + phone; closeModal(); };
   document.getElementById('btnCopyPhone').onclick = () => { copyToClipboard(phone, '전화번호'); closeModal(); };
   document.getElementById('phoneModal').classList.add('show');
 }
@@ -372,24 +325,21 @@ function closeModal() {
   document.getElementById('phoneModal').classList.remove('show');
 }
 
-// 모달 바깥 클릭 시 닫기
 document.getElementById('phoneModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
-// ── 클립보드 복사 ─────────────────────────────────────────
 function copyToClipboard(text, label) {
   navigator.clipboard.writeText(text).then(() => {
-    showToast(`${label}이 복사되었습니다!`);
+    showToast(label + '이 복사되었습니다!');
   }).catch(() => {
-    // fallback
     const el = document.createElement('textarea');
     el.value = text;
     document.body.appendChild(el);
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    showToast(`${label}이 복사되었습니다!`);
+    showToast(label + '이 복사되었습니다!');
   });
 }
 
@@ -399,16 +349,6 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2200);
 }
-
-// ── 초기 렌더링 (cards.json 첫 번째 항목 사용) ───────────────────────────────────────────
-fetch('cards.json')
-  .then(r => r.json())
-  .then(list => renderCard(list[0]))
-  .catch(() => {
-    // 로컬 파일 직접 열 때 fetch 차단되는 경우 안내
-    document.getElementById('nameCard').innerHTML =
-      '<p style="padding:20px;color:red">cards.json을 로드할 수 없습니다. 로컬 서버를 통해 열어주세요.</p>';
-  });
 </script>
 </body>
 </html>

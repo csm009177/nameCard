@@ -1,0 +1,24 @@
+[
+  {
+    "company": {
+      "name_prefix": "JB.E",
+      "name_suffix": "기업지원센터",
+      "slogan": "기업 정책자금 전문 컨설팅",
+      "logo": null
+    },
+    "person": {
+      "department": "경영관리부",
+      "position": "팀장",
+      "name": "오 다 빈"
+    },
+    "contacts": {
+      "phone": "010-4719-0634",
+      "email": "jb260330@naver.com",
+      "address": "대전 서구 둔산동 1015 6층"
+    },
+    "banner": {
+      "icon": "👉",
+      "text": "무료 정책자금 가능 여부 진단"
+    }
+  }
+]
