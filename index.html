@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>디지털 명함 일괄 생성기</title>
+  <style>
+    /* ───────────────────────── 기본 리셋 & 변수 ───────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:   #1a56db;
+      --primary-h: #1e429f;
+      --danger:    #e02424;
+      --danger-h:  #c81e1e;
+      --success:   #057a55;
+      --success-h: #046c4e;
+      --bg:        #f3f4f6;
+      --card-bg:   #ffffff;
+      --border:    #e5e7eb;
+      --text:      #111827;
+      --muted:     #6b7280;
+      --radius:    10px;
+    }
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    /* ───────────────────────── 레이아웃 ───────────────────────── */
+    .app-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .app-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .app-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .app-header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ───────────────────────── 카드 ───────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    /* ───────────────────────── 회사 설정 폼 ───────────────────────── */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .field input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus { border-color: var(--primary); }
+
+    /* ───────────────────────── 인원 테이블 ───────────────────────── */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    thead th {
+      background: #f9fafb;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody tr:hover td { background: #f9fafb; }
+    tbody td {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody td input, tbody td select {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      outline: none;
+      background: #fff;
+      transition: border-color .2s;
+    }
+    tbody td input:focus, tbody td select:focus { border-color: var(--primary); }
+    .row-num {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      width: 36px;
+    }
+
+    /* ───────────────────────── 버튼 ───────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background .18s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary   { background: var(--primary);  color: #fff; }
+    .btn-primary:hover  { background: var(--primary-h); }
+    .btn-danger    { background: var(--danger);   color: #fff; }
+    .btn-danger:hover   { background: var(--danger-h); }
+    .btn-success   { background: var(--success);  color: #fff; }
+    .btn-success:hover  { background: var(--success-h); }
+    .btn-outline   { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-outline:hover  { background: #eff6ff; }
+    .btn-icon      { padding: 7px 10px; border-radius: 6px; font-size: 1rem; }
+    .btn-icon.del  { background: #fef2f2; color: var(--danger); border: none; }
+    .btn-icon.del:hover { background: #fee2e2; }
+
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .spacer { flex: 1; }
+
+    /* ───────────────────────── 진행 상황 ───────────────────────── */
+    #progress-section { display: none; }
+    .progress-bar-bg {
+      background: var(--border);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .progress-bar-fill {
+      background: var(--success);
+      height: 100%;
+      border-radius: 99px;
+      transition: width .3s;
+      width: 0%;
+    }
+    #progress-log {
+      max-height: 140px;
+      overflow-y: auto;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    #progress-log .ok  { color: var(--success); }
+    #progress-log .err { color: var(--danger);  }
+
+    /* ───────────────────────── 미리보기 모달 ───────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .modal-close {
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: var(--muted); line-height: 1;
+    }
+
+    /* ───────────────────────── 명함 미리보기 카드 ───────────────────────── */
+    .biz-card-preview {
+      background: linear-gradient(135deg, #1a3a6e 0%, #1a56db 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 32px 36px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 32px rgba(26,86,219,.3);
+    }
+    .biz-card-preview .company { font-size: 0.85rem; opacity: .75; letter-spacing: .06em; text-transform: uppercase; }
+    .biz-card-preview .name    { font-size: 1.8rem; font-weight: 700; margin: 12px 0 4px; }
+    .biz-card-preview .title   { font-size: 0.95rem; opacity: .85; }
+    .biz-card-preview .dept    { font-size: 0.85rem; opacity: .7;  margin-top: 2px; }
+    .biz-card-preview .contacts { margin-top: 20px; font-size: 0.82rem; opacity: .85; display: flex; flex-direction: column; gap: 4px; }
+    .biz-card-preview .contacts span::before { margin-right: 6px; }
+
+    /* ───────────────────────── 반응형 ───────────────────────── */
+    @media (max-width: 640px) {
+      .card { padding: 20px 16px; }
+      .btn { padding: 8px 14px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- 헤더 -->
+  <header class="app-header">
+    <h1>📇 디지털 명함 일괄 생성기</h1>
+    <p>인원 정보를 입력하고 <strong>일괄 생성</strong> 버튼을 누르면 각각의 HTML 명함 파일이 생성됩니다.</p>
+  </header>
+
+  <!-- 회사 공통 정보 설정 -->
+  <section class="card">
+    <div class="card-title">🏢 회사 공통 정보</div>
+    <div class="settings-grid">
+      <div class="field">
+        <label>회사명</label>
+        <input id="g-company" type="text" placeholder="(주)제이비엔지니어링" />
+      </div>
+      <div class="field">
+        <label>대표번호</label>
+        <input id="g-tel" type="text" placeholder="02-000-0000" />
+      </div>
+      <div class="field">
+        <label>팩스</label>
+        <input id="g-fax" type="text" placeholder="02-000-0001" />
+      </div>
+      <div class="field">
+        <label>홈페이지</label>
+        <input id="g-web" type="text" placeholder="www.example.com" />
+      </div>
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>주소</label>
+        <input id="g-addr" type="text" placeholder="서울특별시 강남구 테헤란로 123, 456호" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 인원 목록 -->
+  <section class="card">
+    <div class="card-title">👥 인원 목록</div>
+    <div class="table-wrapper">
+      <table id="person-table">
+        <thead>
+          <tr>
+            <th class="row-num">#</th>
+            <th style="min-width:110px">부서</th>
+            <th style="min-width:90px">성명</th>
+            <th style="min-width:110px">직함</th>
+            <th style="min-width:140px">휴대폰</th>
+            <th style="min-width:190px">이메일</th>
+            <th style="min-width:80px">미리보기</th>
+            <th style="min-width:60px">삭제</th>
+          </tr>
+        </thead>
+        <tbody id="person-tbody">
+          <!-- 행은 JS로 생성 -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-outline" onclick="addRow()">＋ 인원 추가</button>
+      <button class="btn btn-outline" onclick="importCSV()">📂 CSV 가져오기</button>
+      <div class="spacer"></div>
+      <button class="btn btn-success" onclick="bulkGenerate()">⚡ 일괄 생성 &amp; 저장</button>
+    </div>
+    <!-- 숨겨진 CSV input -->
+    <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(event)" />
+  </section>
+
+  <!-- 진행 상황 -->
+  <section class="card" id="progress-section">
+    <div class="card-title">⏳ 생성 진행 상황</div>
+    <div id="progress-text" style="font-size:.9rem;font-weight:600;margin-bottom:6px;">0 / 0</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    <div id="progress-log"></div>
+  </section>
+
+</div><!-- /app-wrapper -->
+
+<!-- 미리보기 모달 -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>명함 미리보기</h2>
+      <button class="modal-close" onclick="closePreview()">✕</button>
+    </div>
+    <div id="preview-content"></div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────── 상태 ─────────────────────── */
+let rowCount = 0;
+
+/* ─────────────────────── 행 추가 ─────────────────────── */
+function addRow(data = {}) {
+  rowCount++;
+  const tbody = document.getElementById('person-tbody');
+  const tr = document.createElement('tr');
+  tr.id = 'row-' + rowCount;
+  tr.innerHTML = `
+    <td class="row-num">${rowCount}</td>
+    <td><input type="text" placeholder="설계팀"  value="${esc(data.dept   || '')}" /></td>
+    <td><input type="text" placeholder="홍길동"  value="${esc(data.name   || '')}" /></td>
+    <td><input type="text" placeholder="대리"    value="${esc(data.title  || '')}" /></td>
+    <td><input type="text" placeholder="010-0000-0000" value="${esc(data.mobile || '')}" /></td>
+    <td><input type="text" placeholder="email@example.com" value="${esc(data.email  || '')}" /></td>
+    <td><button class="btn btn-icon" onclick="previewRow('row-${rowCount}')">👁</button></td>
+    <td><button class="btn btn-icon del" onclick="removeRow('row-${rowCount}')">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  renumberRows();
+}
+
+function removeRow(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  renumberRows();
+}
+
+function renumberRows() {
+  const rows = document.querySelectorAll('#person-tbody tr');
+  rows.forEach((tr, i) => {
+    tr.querySelector('.row-num').textContent = i + 1;
+  });
+}
+
+/* ─────────────────────── 행 데이터 읽기 ─────────────────────── */
+function getRowData(tr) {
+  const inputs = tr.querySelectorAll('input');
+  return {
+    dept:   inputs[0].value.trim(),
+    name:   inputs[1].value.trim(),
+    title:  inputs[2].value.trim(),
+    mobile: inputs[3].value.trim(),
+    email:  inputs[4].value.trim(),
+  };
+}
+
+function getGlobal() {
+  return {
+    company: document.getElementById('g-company').value.trim(),
+    tel:     document.getElementById('g-tel').value.trim(),
+    fax:     document.getElementById('g-fax').value.trim(),
+    web:     document.getElementById('g-web').value.trim(),
+    addr:    document.getElementById('g-addr').value.trim(),
+  };
+}
+
+/* ─────────────────────── 미리보기 ─────────────────────── */
+function previewRow(id) {
+  const tr = document.getElementById(id);
+  const d  = getRowData(tr);
+  const g  = getGlobal();
+  document.getElementById('preview-content').innerHTML = buildCardHTML_preview(d, g);
+  document.getElementById('preview-modal').classList.add('open');
+}
+function closePreview() {
+  document.getElementById('preview-modal').classList.remove('open');
+}
+// 모달 배경 클릭 시 닫기
+document.getElementById('preview-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePreview();
+});
+
+function buildCardHTML_preview(d, g) {
+  return `
+  <div class="biz-card-preview">
+    <div>
+      <div class="company">${escH(g.company)}</div>
+      <div class="name">${escH(d.name) || '―'}</div>
+      <div class="title">${escH(d.title)}</div>
+      <div class="dept">${escH(d.dept)}</div>
+    </div>
+    <div class="contacts">
+      ${d.mobile ? `<span>📱 ${escH(d.mobile)}</span>` : ''}
+      ${g.tel    ? `<span>☎ ${escH(g.tel)}</span>` : ''}
+      ${g.fax    ? `<span>📠 ${escH(g.fax)}</span>` : ''}
+      ${d.email  ? `<span>✉ ${escH(d.email)}</span>` : ''}
+      ${g.web    ? `<span>🌐 ${escH(g.web)}</span>` : ''}
+      ${g.addr   ? `<span style="font-size:.78rem;opacity:.65">📍 ${escH(g.addr)}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+/* ─────────────────────── 생성할 명함 HTML ─────────────────────── */
+function buildCardFile(d, g) {
+  const name    = escH(d.name);
+  const title   = escH(d.title);
+  const dept    = escH(d.dept);
+  const company = escH(g.company);
+  const mobile  = escH(d.mobile);
+  const email   = escH(d.email);
+  const tel     = escH(g.tel);
+  const fax     = escH(g.fax);
+  const web     = escH(g.web);
+  const addr    = escH(g.addr);
+
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>${name} - ${company}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f4ff;
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      padding: 30px 20px;
+    }
+    .card {
+      background: linear-gradient(135deg, #1a3a6e 0%, #1a56db 100%);
+      color: #fff;
+      border-radius: 20px;
+      padding: 44px 48px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 16px 48px rgba(26,86,219,.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      right: 40px; bottom: -80px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+    }
+    .company { font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+    .name    { font-size: 2.2rem; font-weight: 800; margin: 14px 0 6px; letter-spacing: -.01em; }
+    .meta    { font-size: .95rem; opacity: .8; }
+    .dept    { font-size: .88rem; opacity: .65; margin-top: 3px; }
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,.2);
+      margin: 24px 0;
+    }
+    .contacts { display: flex; flex-direction: column; gap: 8px; }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: .9rem;
+      opacity: .85;
+    }
+    .contact-item .icon { width: 20px; text-align: center; opacity: .7; }
+    .contact-item a { color: inherit; text-decoration: none; }
+    .contact-item a:hover { text-decoration: underline; }
+    .addr-item {
+      font-size: .8rem;
+      opacity: .6;
+      margin-top: 8px;
+      padding-left: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    ${company ? `<div class="company">${company}</div>` : ''}
+    <div class="name">${name || '―'}</div>
+    <div class="meta">${[title, dept].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div>
+    <hr class="divider"/>
+    <div class="contacts">
+      ${mobile ? `<div class="contact-item"><span class="icon">📱</span><span>${mobile}</span></div>` : ''}
+      ${tel    ? `<div class="contact-item"><span class="icon">☎</span><span>${tel}</span></div>` : ''}
+      ${fax    ? `<div class="contact-item"><span class="icon">📠</span><span>FAX ${fax}</span></div>` : ''}
+      ${email  ? `<div class="contact-item"><span class="icon">✉</span><a href="mailto:${email}">${email}</a></div>` : ''}
+      ${web    ? `<div class="contact-item"><span class="icon">🌐</span><a href="https://${web}" target="_blank">${web}</a></div>` : ''}
+    </div>
+    ${addr ? `<div class="addr-item">📍 ${addr}</div>` : ''}
+  </div>
+</body>
+</html>`;
+}
+
+/* ─────────────────────── 파일명 생성 ─────────────────────── */
+function buildFileName(d) {
+  const parts = [d.dept, d.name, d.title].filter(Boolean);
+  const base  = parts.join('_') || '명함';
+  // 파일명에 사용 불가 문자 제거
+  return base.replace(/[\\/:*?"<>|]/g, '') + '.html';
+}
+
+/* ─────────────────────── 일괄 생성 ─────────────────────── */
+async function bulkGenerate() {
+  const rows  = [...document.querySelectorAll('#person-tbody tr')];
+  if (rows.length === 0) { alert('인원을 먼저 추가해주세요.'); return; }
+
+  const g = getGlobal();
+  const people = rows.map(tr => ({ ...getRowData(tr), _tr: tr }));
+
+  // 필수 항목(성명) 확인
+  const missing = people.filter(p => !p.name);
+  if (missing.length > 0) { alert('성명이 비어있는 행이 있습니다. 확인해주세요.'); return; }
+
+  // File System Access API 지원 여부 확인
+  if (!('showDirectoryPicker' in window)) {
+    alert('이 기능은 Chrome / Edge 브라우저에서만 지원됩니다.\n(File System Access API 필요)');
+    return;
+  }
+
+  let dirHandle;
+  try {
+    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+  } catch (e) {
+    if (e.name !== 'AbortError') console.error(e);
+    return;
+  }
+
+  // 진행 UI 표시
+  const section  = document.getElementById('progress-section');
+  const fillEl   = document.getElementById('progress-fill');
+  const textEl   = document.getElementById('progress-text');
+  const logEl    = document.getElementById('progress-log');
+  section.style.display = 'block';
+  logEl.innerHTML = '';
+  section.scrollIntoView({ behavior: 'smooth' });
+
+  let ok = 0, fail = 0;
+  for (let i = 0; i < people.length; i++) {
+    const p    = people[i];
+    const fname = buildFileName(p);
+    const html  = buildCardFile(p, g);
+    try {
+      const fh = await dirHandle.getFileHandle(fname, { create: true });
+      const w  = await fh.createWritable();
+      await w.write(html);
+      await w.close();
+      ok++;
+      log(logEl, `✅ ${fname}`, 'ok');
+    } catch (e) {
+      fail++;
+      log(logEl, `❌ ${fname} — ${e.message}`, 'err');
+    }
+    const pct = Math.round(((i + 1) / people.length) * 100);
+    fillEl.style.width = pct + '%';
+    textEl.textContent = `${i + 1} / ${people.length}`;
+  }
+
+  log(logEl, `─────────────────────`, '');
+  log(logEl, `완료: ${ok}개 성공 · ${fail}개 실패`, fail > 0 ? 'err' : 'ok');
+}
+
+function log(el, msg, cls) {
+  const span = document.createElement('div');
+  if (cls) span.className = cls;
+  span.textContent = msg;
+  el.appendChild(span);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ─────────────────────── CSV 가져오기 ─────────────────────── */
+function importCSV() {
+  document.getElementById('csv-input').click();
+}
+
+function handleCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+    // 첫 줄이 헤더인지 확인 (숫자가 아닌 경우 헤더로 간주)
+    let start = 0;
+    if (lines[0] && isNaN(lines[0].split(',')[0])) start = 1;
+    for (let i = start; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+      addRow({ dept: cols[0], name: cols[1], title: cols[2], mobile: cols[3], email: cols[4] });
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+  event.target.value = ''; // 재선택 가능하도록 초기화
+}
+
+/* ─────────────────────── 유틸 ─────────────────────── */
+function esc(str)  { return String(str).replace(/"/g, '&quot;'); }
+function escH(str) { return String(str)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+/* ─────────────────────── 초기 3행 ─────────────────────── */
+(function init() {
+  addRow({ dept: '설계팀', name: '김창직', title: '대리', mobile: '010-0000-0001', email: 'kim@example.com' });
+  addRow({ dept: '설계팀', name: '염하진', title: '대리', mobile: '010-0000-0002', email: 'yum@example.com' });
+  addRow({ dept: '설계팀', name: '최상일', title: '대리', mobile: '010-0000-0003', email: 'choi@example.com' });
+})();
+</script>
+</body>
+</html>
