@@ -1,4 +1,5 @@
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { useRef } from 'react';
+import { ImageIcon, X } from 'lucide-react';
 
 interface BusinessCardFormProps {
   formData: {
@@ -12,16 +13,75 @@ interface BusinessCardFormProps {
     tagline: string;
     primaryColor: string;
     secondaryColor: string;
+    logoUrl: string;
   };
   onChange: (field: string, value: string) => void;
 }
 
 export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onChange('logoUrl', ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="w-full max-w-md space-y-6 p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-gray-800">명함 정보 입력</h2>
 
       <div className="space-y-4">
+
+        {/* ── 로고 업로드 ── */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            로고 이미지
+          </label>
+          <div className="flex items-center gap-4">
+            {/* 미리보기 */}
+            <div
+              className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-blue-400 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {formData.logoUrl ? (
+                <img src={formData.logoUrl} alt="로고" className="w-full h-full object-contain" />
+              ) : (
+                <ImageIcon size={24} className="text-gray-400" />
+              )}
+            </div>
+            <div className="flex flex-col gap-2 flex-1">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50 transition-colors text-left"
+              >
+                이미지 선택 (JPG, PNG, WEBP)
+              </button>
+              {formData.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => { onChange('logoUrl', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-red-500 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
+                >
+                  <X size={12} /> 이미지 제거
+                </button>
+              )}
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoChange}
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             회사명

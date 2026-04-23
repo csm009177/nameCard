@@ -17,6 +17,7 @@ interface BusinessCardPreviewProps {
     tagline: string;
     primaryColor: string;
     secondaryColor: string;
+    logoUrl?: string;
   };
   isPreviewMode?: boolean;
 }
@@ -261,10 +262,14 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
         </div>
         <div className="ml-4">
           <div
-            className="w-16 h-16 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: formData.primaryColor + "20" }}
+            className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden"
+            style={{ backgroundColor: formData.logoUrl ? 'transparent' : formData.primaryColor + "20" }}
           >
-            <TrendingUp size={32} style={{ color: formData.secondaryColor }} />
+            {formData.logoUrl ? (
+              <img src={formData.logoUrl} alt="로고" className="w-full h-full object-contain" />
+            ) : (
+              <TrendingUp size={32} style={{ color: formData.secondaryColor }} />
+            )}
           </div>
         </div>
       </div>

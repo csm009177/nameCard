@@ -9,6 +9,7 @@ export interface CardData {
   tagline: string;
   primaryColor: string;
   secondaryColor: string;
+  logoUrl?: string;
 }
 
 export function exportToHtml(data: CardData): void {
@@ -23,6 +24,7 @@ export function exportToHtml(data: CardData): void {
     tagline,
     primaryColor,
     secondaryColor,
+    logoUrl,
   } = data;
 
   const esc = (s: string) =>
@@ -165,9 +167,12 @@ export function exportToHtml(data: CardData): void {
           <div class="company-sub">${esc(companySubtitle || "")}</div>
         </div>
         <div class="logo-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${esc(secondaryColor)}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          ${logoUrl
+            ? `<img src="${logoUrl}" alt="로고" style="width:100%;height:100%;object-fit:contain;" />`
+            : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${esc(secondaryColor)}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-          </svg>
+          </svg>`
+          }
         </div>
       </div>
       <!-- 중단 -->
