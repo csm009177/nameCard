@@ -275,8 +275,27 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
         + '#Intent;scheme=https;action=android.intent.action.VIEW;'
         + 'category=android.intent.category.BROWSABLE;end';
     } else if (/iPhone|iPad|iPod/i.test(ua)) {
-      // iOS: kakaotalk 앱에서는 window.open 으로 Safari 유도
-      window.open(window.location.href, '_blank');
+      // iOS: window.open 먼저 시도, 차단될 경우 안내 배너 표시
+      var opened = window.open(window.location.href, '_blank');
+      if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+        // 팝업 차단된 경우 안내 배너 삽입
+        var banner = document.createElement('div');
+        banner.id = 'kakao-banner';
+        banner.style.cssText = [
+          'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:9999',
+          'background:#FEE500', 'color:#3C1E1E', 'padding:14px 16px',
+          'font-family:-apple-system,sans-serif', 'font-size:14px',
+          'display:flex', 'align-items:center', 'justify-content:space-between',
+          'gap:10px', 'box-shadow:0 2px 8px rgba(0,0,0,.18)'
+        ].join(';');
+        banner.innerHTML =
+          '<span>🌐 카카오톡에서는 일부 기능이 제한됩니다.<br>' +
+          '<b>우측 상단 ···</b> 메뉴 → <b>다른 브라우저로 열기</b>를 눌러 주세요.</span>' +
+          '<button onclick="document.getElementById(\'kakao-banner\').remove()" ' +
+          'style="flex-shrink:0;background:rgba(0,0,0,.12);border:none;border-radius:50%;' +
+          'width:26px;height:26px;font-size:16px;cursor:pointer;line-height:1">✕</button>';
+        document.body.prepend(banner);
+      }
     }
   })();
 
