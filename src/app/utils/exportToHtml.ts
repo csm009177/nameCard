@@ -152,13 +152,14 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
   .card:hover .tagline-emoji { transform: translateX(6px); }
   .tagline-text { font-size: clamp(9px, 2vw, 14px); font-weight: 600; color: ${esc(secondaryColor)}; }
   /* ── 액션 버튼 ── */
-  .actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .actions { display: flex; flex-direction: row; gap: 12px; flex-wrap: nowrap; justify-content: center; align-items: center; width: min(540px, 100%); }
   .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 0; border-radius: 10px; border: none; cursor: pointer;
     font-size: 14px; font-weight: 600; text-decoration: none;
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    flex: 1;
   }
   .btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
   .btn:active { transform: scale(0.97); }
