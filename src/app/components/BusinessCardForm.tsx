@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { ImageIcon, X } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface BusinessCardFormProps {
   formData: {
@@ -21,14 +22,39 @@ interface BusinessCardFormProps {
 export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      onChange('logoUrl', ev.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+
+    try {
+      // 고유한 파일명 생성
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `logos/${fileName}`;
+
+      // Supabase Storage에 업로드
+      const { data, error } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file);
+
+      if (error) {
+        console.error('로고 업로드 실패:', error);
+        alert('로고 업로드에 실패했습니다.');
+        return;
+      }
+
+      // 공개 URL 가져오기
+      const { data: urlData } = supabase.storage
+        .from('logos')
+        .getPublicUrl(filePath);
+
+      if (urlData?.publicUrl) {
+        onChange('logoUrl', urlData.publicUrl);
+      }
+    } catch (error) {
+      console.error('로고 업로드 중 오류:', error);
+      alert('로고 업로드 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -65,7 +91,7 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
               {formData.logoUrl && (
                 <button
                   type="button"
-                  onClick={() => { onChange('logoUrl', ''); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                  onClick={() => { onChange('logoUrl', '/logo.webp'); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                   className="flex items-center gap-1 px-3 py-1.5 text-xs text-red-500 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
                 >
                   <X size={12} /> 이미지 제거
