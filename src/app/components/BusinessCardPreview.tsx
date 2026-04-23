@@ -376,61 +376,57 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
         </div>
       </div>
 
-      {/* ── 녹화 진행 바 ── */}
-      {isRecording && (
-        <div className="mt-4 px-2">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-purple-600 flex items-center gap-1">
-              <span className="inline-block w-2 h-2 rounded-full bg-red-500" style={{ animation: "card-spin 1s linear infinite" }} />
-              WebM 녹화 중... {recordProgress}%
-            </span>
-            <span className="text-xs text-gray-400">4초 애니메이션 캡처</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-2 rounded-full transition-all duration-100"
-              style={{ width: `${recordProgress}%`, backgroundColor: "#7c3aed" }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* ── 다운로드 버튼 ── */}
-      <div className="mt-6 flex justify-center">
-        <div ref={dropdownRef} className="relative inline-flex">
-          {/* 메인 버튼 */}
-          <button
-            onClick={() => doCapture("png")}
-            disabled={isDownloading}
-            className="flex items-center gap-2 px-6 py-3 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-60"
-            style={{ backgroundColor: formData.primaryColor, borderRadius: "8px 0 0 8px", border: "none", cursor: isDownloading ? "not-allowed" : "pointer" }}
-          >
-            {isDownloading ? (
-              <>
-                <span className="inline-block w-4 h-4 rounded-full border-2 border-white/30 border-t-white" style={{ animation: "card-spin 0.7s linear infinite" }} />
-                처리 중...
-              </>
-            ) : (
-              <><Download size={18} /> 다른 방식으로 공유</>
-            )}
-          </button>
+      <div className="mt-6 flex flex-col items-center gap-3">
 
-          {/* 포맷 선택 토글 */}
-          <button
-            title="다운로드 형식 선택"
-            onClick={() => setShowDropdown(v => !v)}
-            disabled={isDownloading}
-            className="flex items-center px-3 py-3 text-white shadow-lg hover:brightness-110 transition-all duration-200 disabled:opacity-60"
-            style={{ backgroundColor: formData.primaryColor, borderRadius: "0 8px 8px 0", borderLeft: "1px solid rgba(255,255,255,0.3)", border: "none", cursor: isDownloading ? "not-allowed" : "pointer" }}
-          >
-            <ChevronDown size={16} style={{ transform: showDropdown ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-          </button>
+        {/* ── 1번: HTML로 내보내기 ── */}
+        <button
+          onClick={() => exportToHtml(formData)}
+          className="flex items-center justify-center gap-2 w-full max-w-sm px-6 py-3 rounded-lg text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+          style={{ backgroundColor: "#059669" }}
+        >
+          <Code2 size={18} /> HTML로 내보내기
+        </button>
+        <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed -mt-1">
+          📁 단일 .html 파일 · 카카오톡·메일·USB 공유 · 오프라인 동작
+        </p>
 
-          {/* 드롭다운 */}
+        {/* ── 2번: 다른 방식으로 공유 (드롭다운) ── */}
+        <div ref={dropdownRef} className="relative w-full max-w-sm">
+          <div className="flex w-full">
+            {/* 메인 버튼 */}
+            <button
+              onClick={() => doCapture("png")}
+              disabled={isDownloading}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:brightness-110 active:scale-95 disabled:opacity-60"
+              style={{ backgroundColor: formData.primaryColor, borderRadius: "8px 0 0 8px", border: "none", cursor: isDownloading ? "not-allowed" : "pointer" }}
+            >
+              {isDownloading ? (
+                <>
+                  <span className="inline-block w-4 h-4 rounded-full border-2 border-white/30 border-t-white" style={{ animation: "card-spin 0.7s linear infinite" }} />
+                  처리 중...
+                </>
+              ) : (
+                <><Download size={18} /> 다른 방식으로 공유</>
+              )}
+            </button>
+            {/* 드롭다운 토글 */}
+            <button
+              title="공유 형식 선택"
+              onClick={() => setShowDropdown(v => !v)}
+              disabled={isDownloading}
+              className="flex items-center px-3 py-3 text-white shadow-lg hover:brightness-110 transition-all duration-200 disabled:opacity-60"
+              style={{ backgroundColor: formData.primaryColor, borderRadius: "0 8px 8px 0", borderLeft: "1px solid rgba(255,255,255,0.3)", border: "none", cursor: isDownloading ? "not-allowed" : "pointer" }}
+            >
+              <ChevronDown size={16} style={{ transform: showDropdown ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+            </button>
+          </div>
+
+          {/* 드롭다운 메뉴 */}
           {showDropdown && (
-            <div className="absolute bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50" style={{ bottom: "calc(100% + 8px)", right: 0, minWidth: "190px" }}>
+            <div className="absolute bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50" style={{ bottom: "calc(100% + 8px)", left: 0, right: 0, minWidth: "100%" }}>
               <div className="px-3 py-2 text-xs text-gray-400 font-semibold tracking-wide border-b border-gray-50">
-                다운로드 형식 선택
+                공유 형식 선택
               </div>
               {[
                 { label: "PNG 이미지", desc: "고화질 · 투명 배경", icon: <ImageIcon size={15} />, fmt: "png" as const },
@@ -462,74 +458,68 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
                   <div className="text-xs text-gray-400">3D 애니메이션 · 4초 녹화</div>
                 </span>
               </button>
-              <div className="border-t border-gray-100 mx-3 my-1" />
-              <button
-                onClick={() => { setShowDropdown(false); exportToHtml(formData); }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-emerald-50 transition-colors"
-                style={{ border: "none", cursor: "pointer", background: "none" }}
-              >
-                <span style={{ color: "#059669" }}><Code2 size={15} /></span>
-                <span>
-                  <div className="text-sm font-semibold text-gray-800">HTML 파일</div>
-                  <div className="text-xs text-gray-400">오프라인 동작 · 카톡/메일 공유용</div>
-                </span>
-              </button>
+              {!isPreviewMode && (
+                <>
+                  <div className="border-t border-gray-100 mx-3 my-1" />
+                  <button
+                    onClick={() => { setShowDropdown(false); doShare(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-indigo-50 transition-colors"
+                    style={{ border: "none", cursor: "pointer", background: "none" }}
+                  >
+                    <span style={{ color: shareState === 'copied' ? '#16a34a' : '#7c3aed' }}>
+                      {shareState === 'copied' ? <Check size={15} /> : <Share2 size={15} />}
+                    </span>
+                    <span>
+                      <div className="text-sm font-semibold text-gray-800">
+                        {shareState === 'copied' ? '링크 복사 완료!' : '링크로 공유'}
+                      </div>
+                      <div className="text-xs text-gray-400">URL 생성 · 어느 기기에서나 열람</div>
+                    </span>
+                  </button>
+                  {shareState === 'copied' && savedId && (
+                    <div className="mx-3 mb-2">
+                      <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <span className="text-xs text-green-700 truncate flex-1">
+                          {window.location.origin}/preview/{savedId}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
+
       </div>
+
+      {/* ── 녹화 진행 바 ── */}
+      {isRecording && (
+        <div className="mt-4 px-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-purple-600 flex items-center gap-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500" style={{ animation: "card-spin 1s linear infinite" }} />
+              WebM 녹화 중... {recordProgress}%
+            </span>
+            <span className="text-xs text-gray-400">4초 애니메이션 캡처</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div
+              className="h-2 rounded-full transition-all duration-100"
+              style={{ width: `${recordProgress}%`, backgroundColor: "#7c3aed" }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* 해상도 안내 */}
       <p className="text-center text-xs text-gray-400 mt-2">
         출력 해상도: {CARD_W_PX} × {CARD_H_PX}px (300 DPI · 표준 명함 규격)
       </p>
 
-      {/* ── 공유 버튼 (에디터 모드에서만 표시) ── */}
-      {!isPreviewMode && (
-      <div className="mt-4 flex flex-col items-center gap-2">
-        {/* HTML 내보내기 버튼 */}
-        <button
-          onClick={() => exportToHtml(formData)}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white w-full max-w-sm justify-center"
-          style={{ backgroundColor: "#059669" }}
-        >
-          <Code2 size={18} /> HTML로 내보내기
-        </button>
-        <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed">
-          📁 단일 .html 파일 생성 — 카카오톡·메일·USB로 공유,<br />받는 사람이 브라우저에서 바로 오프라인 열람 가능
-        </p>
-        <div className="w-full max-w-sm border-t border-gray-100 my-1" />
-
-        
-        <button
-          onClick={doShare}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white"
-          style={{ backgroundColor: shareState === 'copied' ? '#16a34a' : '#7c3aed' }}
-        >
-          {shareState === 'copied' ? (
-            <><Check size={18} /> 링크 복사 완료!</>
-          ) : (
-            <><Share2 size={18} /> 저장 & 공유 링크 생성</>
-          )}
-        </button>
-
-        {/* 복사된 URL 표시 */}
-        {shareState === 'copied' && savedId && (
-          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2 w-full max-w-sm">
-            <span className="text-xs text-green-700 truncate flex-1">
-              {window.location.origin}/preview/{savedId}
-            </span>
-          </div>
-        )}
-
-        {/* 로컬 스토리지 안내 */}
-        <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed">
-          ⚠️ 이 링크는 <strong>이 브라우저</strong>에서만 열립니다.<br />
-          다른 기기 공유는 HTML · PNG · PDF · WebM 파일로 저장하세요.
-        </p>
-      </div>
-      )}
-
+      <p className="text-center text-sm text-gray-400 mt-3 animate-pulse">
+        ✦ 명함 위에 마우스를 올려보세요
+      </p>
 
       <style>{`@keyframes card-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
