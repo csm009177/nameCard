@@ -96,6 +96,7 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
   }
   .card-inner {
     position: absolute; inset: 0; padding: clamp(12px, 4%, 28px);
+    padding-bottom: calc(clamp(12px, 4%, 28px) + clamp(36px, 8%, 56px));
     display: flex; flex-direction: column;
   }
   /* ── 상단 헤더 ── */
