@@ -6,14 +6,14 @@ import PreviewPage from './pages/PreviewPage';
 
 // 기본 폼 데이터
 const DEFAULT_FORM = {
-  companyName: '회사명을 입력하세요',
-  companySubtitle: '회사 부제목을 입력하세요',
-  name: '이름을 입력하세요',
-  title: '직책을 입력하세요',
-  phone: '전화번호를 입력하세요',
-  email: '이메일을 입력하세요',
-  address: '주소를 입력하세요',
-  tagline: '태그라인을 입력하세요',
+  companyName: 'JB.E 기업지원센터',
+  companySubtitle: '',
+  name: '',
+  title: '',
+  phone: '',
+  email: 'jb260330@naver.com',
+  address: '대전 서구 둔산동 1015 6층',
+  tagline: '무료 정책자금 가능 여부 진단',
   primaryColor: '#1e3a8a',
   secondaryColor: '#f59e0b'
 };
