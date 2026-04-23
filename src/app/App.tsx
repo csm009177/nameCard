@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import { BusinessCardForm } from './components/BusinessCardForm';
 import { BusinessCardPreview } from './components/BusinessCardPreview';
 import PreviewPage from './pages/PreviewPage';
-import defaultLogo from '../../logo.webp';
 
 // 기본 폼 데이터
 const DEFAULT_FORM = {
@@ -17,7 +16,7 @@ const DEFAULT_FORM = {
   tagline: '무료 정책자금 가능 여부 진단',
   primaryColor: '#1e3a8a',
   secondaryColor: '#f59e0b',
-  logoUrl: defaultLogo as string,
+  logoUrl: '/logo.webp',
 };
 
 function EditorPage() {
