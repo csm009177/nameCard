@@ -411,7 +411,7 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
                 처리 중...
               </>
             ) : (
-              <><Download size={18} /> PNG 다운로드</>
+              <><Download size={18} /> 다른 방식으로 공유</>
             )}
           </button>
 
@@ -499,6 +499,8 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
           📁 단일 .html 파일 생성 — 카카오톡·메일·USB로 공유,<br />받는 사람이 브라우저에서 바로 오프라인 열람 가능
         </p>
         <div className="w-full max-w-sm border-t border-gray-100 my-1" />
+
+        
         <button
           onClick={doShare}
           className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white"
@@ -523,14 +525,11 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
         {/* 로컬 스토리지 안내 */}
         <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed">
           ⚠️ 이 링크는 <strong>이 브라우저</strong>에서만 열립니다.<br />
-          다른 기기 공유는 PNG · PDF · WebM 파일로 저장하세요.
+          다른 기기 공유는 HTML · PNG · PDF · WebM 파일로 저장하세요.
         </p>
       </div>
       )}
 
-      <p className="text-center text-sm text-gray-400 mt-3 animate-pulse">
-        ✦ 명함 위에 마우스를 올려보세요
-      </p>
 
       <style>{`@keyframes card-spin { to { transform: rotate(360deg); } }`}</style>
     </div>

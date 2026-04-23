@@ -32,7 +32,6 @@ function EditorPage() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-800 mb-4">디지털 명함 생성기</h1>
-          <p className="text-xl text-gray-600">정보를 입력하고 실시간으로 명함을 확인하세요</p>
         </div>
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           <BusinessCardForm formData={formData} onChange={handleChange} />
