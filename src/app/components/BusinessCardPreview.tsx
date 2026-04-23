@@ -1,7 +1,8 @@
-﻿import { Phone, Mail, MapPin, TrendingUp, Download, ImageIcon, FileText, ChevronDown, Video, Share2, Check } from "lucide-react";
+﻿import { Phone, Mail, MapPin, TrendingUp, Download, ImageIcon, FileText, ChevronDown, Video, Share2, Check, Code2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toPng, toJpeg } from "html-to-image";
 import jsPDF from "jspdf";
+import { exportToHtml } from "../utils/exportToHtml";
 
 interface BusinessCardPreviewProps {
   formData: {
@@ -452,6 +453,18 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
                   <div className="text-xs text-gray-400">3D 애니메이션 · 4초 녹화</div>
                 </span>
               </button>
+              <div className="border-t border-gray-100 mx-3 my-1" />
+              <button
+                onClick={() => { setShowDropdown(false); exportToHtml(formData); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-emerald-50 transition-colors"
+                style={{ border: "none", cursor: "pointer", background: "none" }}
+              >
+                <span style={{ color: "#059669" }}><Code2 size={15} /></span>
+                <span>
+                  <div className="text-sm font-semibold text-gray-800">HTML 파일</div>
+                  <div className="text-xs text-gray-400">오프라인 동작 · 카톡/메일 공유용</div>
+                </span>
+              </button>
             </div>
           )}
         </div>
@@ -465,6 +478,18 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
       {/* ── 공유 버튼 (에디터 모드에서만 표시) ── */}
       {!isPreviewMode && (
       <div className="mt-4 flex flex-col items-center gap-2">
+        {/* HTML 내보내기 버튼 */}
+        <button
+          onClick={() => exportToHtml(formData)}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white w-full max-w-sm justify-center"
+          style={{ backgroundColor: "#059669" }}
+        >
+          <Code2 size={18} /> HTML로 내보내기
+        </button>
+        <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed">
+          📁 단일 .html 파일 생성 — 카카오톡·메일·USB로 공유,<br />받는 사람이 브라우저에서 바로 오프라인 열람 가능
+        </p>
+        <div className="w-full max-w-sm border-t border-gray-100 my-1" />
         <button
           onClick={doShare}
           className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white"
