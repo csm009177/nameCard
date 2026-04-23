@@ -32,6 +32,7 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
             onChange={(e) => onChange('companyName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="JB.E 기업지원센터"
+            autoFocus
           />
         </div>
 
