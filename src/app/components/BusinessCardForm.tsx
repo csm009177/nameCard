@@ -138,6 +138,8 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
               value={formData.primaryColor}
               onChange={(e) => onChange('primaryColor', e.target.value)}
               className="w-full h-10 rounded-md cursor-pointer"
+              title="메인 컬러"
+              aria-label="메인 컬러"
             />
           </div>
 
@@ -150,6 +152,8 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
               value={formData.secondaryColor}
               onChange={(e) => onChange('secondaryColor', e.target.value)}
               className="w-full h-10 rounded-md cursor-pointer"
+              title="보조 컬러"
+              aria-label="보조 컬러"
             />
           </div>
         </div>

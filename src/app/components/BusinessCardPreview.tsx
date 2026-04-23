@@ -1,4 +1,4 @@
-﻿import { Phone, Mail, MapPin, TrendingUp, Download, ImageIcon, FileText, ChevronDown, Video } from "lucide-react";
+﻿import { Phone, Mail, MapPin, TrendingUp, Download, ImageIcon, FileText, ChevronDown, Video, Share2, Check } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toPng, toJpeg } from "html-to-image";
 import jsPDF from "jspdf";
@@ -16,6 +16,7 @@ interface BusinessCardPreviewProps {
     primaryColor: string;
     secondaryColor: string;
   };
+  isPreviewMode?: boolean;
 }
 
 const CARD_W_MM = 85.6;
@@ -23,7 +24,7 @@ const CARD_H_MM = 54;
 const CARD_W_PX = Math.round((CARD_W_MM / 25.4) * 300);
 const CARD_H_PX = Math.round((CARD_H_MM / 25.4) * 300);
 
-export function BusinessCardPreview({ formData }: BusinessCardPreviewProps) {
+export function BusinessCardPreview({ formData, isPreviewMode = false }: BusinessCardPreviewProps) {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [shadow, setShadow] = useState("0 25px 50px -12px rgba(0,0,0,0.25)");
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
@@ -33,6 +34,8 @@ export function BusinessCardPreview({ formData }: BusinessCardPreviewProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordProgress, setRecordProgress] = useState(0);
+  const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
@@ -191,6 +194,24 @@ export function BusinessCardPreview({ formData }: BusinessCardPreviewProps) {
       a.click();
       URL.revokeObjectURL(url);
     }
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // ─── 로컬 스토리지 저장 & 공유 URL 복사 ──────────────────────────────────
+  const doShare = async () => {
+    const id = Date.now().toString();
+    localStorage.setItem(`namecard_${id}`, JSON.stringify(formData));
+    setSavedId(id);
+    const url = `${window.location.origin}/preview/${id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // clipboard API 실패 시 수동 복사 안내
+      prompt("아래 URL을 복사하세요:", url);
+      return;
+    }
+    setShareState('copied');
+    setTimeout(() => setShareState('idle'), 3000);
   };
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -440,7 +461,40 @@ export function BusinessCardPreview({ formData }: BusinessCardPreviewProps) {
       <p className="text-center text-xs text-gray-400 mt-2">
         출력 해상도: {CARD_W_PX} × {CARD_H_PX}px (300 DPI · 표준 명함 규격)
       </p>
-      <p className="text-center text-sm text-gray-400 mt-1 animate-pulse">
+
+      {/* ── 공유 버튼 (에디터 모드에서만 표시) ── */}
+      {!isPreviewMode && (
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <button
+          onClick={doShare}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-white"
+          style={{ backgroundColor: shareState === 'copied' ? '#16a34a' : '#7c3aed' }}
+        >
+          {shareState === 'copied' ? (
+            <><Check size={18} /> 링크 복사 완료!</>
+          ) : (
+            <><Share2 size={18} /> 저장 & 공유 링크 생성</>
+          )}
+        </button>
+
+        {/* 복사된 URL 표시 */}
+        {shareState === 'copied' && savedId && (
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2 w-full max-w-sm">
+            <span className="text-xs text-green-700 truncate flex-1">
+              {window.location.origin}/preview/{savedId}
+            </span>
+          </div>
+        )}
+
+        {/* 로컬 스토리지 안내 */}
+        <p className="text-xs text-gray-400 text-center max-w-xs leading-relaxed">
+          ⚠️ 이 링크는 <strong>이 브라우저</strong>에서만 열립니다.<br />
+          다른 기기 공유는 PNG · PDF · WebM 파일로 저장하세요.
+        </p>
+      </div>
+      )}
+
+      <p className="text-center text-sm text-gray-400 mt-3 animate-pulse">
         ✦ 명함 위에 마우스를 올려보세요
       </p>
 
