@@ -112,12 +112,12 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
   /* ── 중단 ── */
   .body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: clamp(4px, 1%, 8px); }
   .person { text-align: right; margin-bottom: clamp(4px, 1.5%, 10px); }
-  .person-title { font-size: clamp(8px, 1.5vw, 11px); color: #666; }
-  .person-name  { font-size: clamp(14px, 3vw, 22px); font-weight: 800; color: ${esc(primaryColor)}; }
+  .person-title { font-size: clamp(9px, 1.5vw, 11px); color: #666; }
+  .person-name  { font-size: clamp(16px, 3vw, 22px); font-weight: 800; color: ${esc(primaryColor)}; }
   .divider { height: 1px; background: #e2e8f0; }
   .row {
     display: flex; align-items: center; justify-content: flex-end;
-    gap: clamp(4px, 1.5vw, 10px); font-size: clamp(8px, 1.6vw, 13px); color: ${esc(primaryColor)};
+    gap: clamp(4px, 1.5vw, 10px); font-size: clamp(10px, 1.6vw, 13px); color: ${esc(primaryColor)};
   }
   .row a { color: inherit; text-decoration: none; }
   @media (hover: hover) { .row a:hover { text-decoration: underline; } }
@@ -134,7 +134,7 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
     background: ${esc(primaryColor)}; display: flex; align-items: center; gap: 8px;
   }
   .tagline-emoji { font-size: clamp(12px, 2.5vw, 20px); display: inline-block; transition: transform 0.3s; }
-  .tagline-text { font-size: clamp(8px, 1.8vw, 13px); font-weight: 600; color: ${esc(secondaryColor)}; }
+  .tagline-text { font-size: clamp(10px, 1.8vw, 13px); font-weight: 600; color: ${esc(secondaryColor)}; }
   /* ── 액션 버튼 ── */
   .actions { display: flex; flex-direction: row; gap: 10px; width: min(540px, 100%); }
   .btn {
