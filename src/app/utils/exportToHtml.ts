@@ -263,6 +263,23 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
   var glare = document.getElementById('glare');
   var isMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+  /* ── 카카오톡 인앱 브라우저 → 외부 브라우저 강제 이동 ── */
+  (function () {
+    var ua = navigator.userAgent;
+    var isKakao = ua.indexOf('KAKAOTALK') > -1;
+    if (!isKakao) return;
+    var url = encodeURIComponent(window.location.href);
+    if (/Android/i.test(ua)) {
+      // 안드로이드: intent 스킴으로 Chrome/기본 브라우저 실행
+      window.location.href = 'intent://' + window.location.href.replace(/https?:\/\//, '')
+        + '#Intent;scheme=https;action=android.intent.action.VIEW;'
+        + 'category=android.intent.category.BROWSABLE;end';
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+      // iOS: kakaotalk 앱에서는 window.open 으로 Safari 유도
+      window.open(window.location.href, '_blank');
+    }
+  })();
+
   /* ── 3D 틸트 (마우스 기기만) ── */
   if (isMouse) {
     card.addEventListener('mousemove', function (e) {
