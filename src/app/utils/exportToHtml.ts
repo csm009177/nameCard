@@ -13,6 +13,35 @@ export interface CardData {
 }
 
 export function exportToHtml(data: CardData): void {
+  // 로고를 Base64로 변환 후 HTML 생성
+  _fetchLogoBase64(data.logoUrl).then((logoBase64) => {
+    _buildAndDownload(data, logoBase64);
+  });
+}
+
+/** URL → Base64 변환 (실패 시 null 반환) */
+async function _fetchLogoBase64(logoUrl?: string): Promise<string | null> {
+  if (!logoUrl) return null;
+  // 이미 Base64인 경우
+  if (logoUrl.startsWith('data:')) return logoUrl;
+  try {
+    // 상대 경로면 절대 경로로 변환
+    const absoluteUrl = logoUrl.startsWith('http')
+      ? logoUrl
+      : `${window.location.origin}${logoUrl.startsWith('/') ? '' : '/'}${logoUrl}`;
+    const res = await fetch(absoluteUrl);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void {
   const {
     companyName,
     companySubtitle,
@@ -24,18 +53,10 @@ export function exportToHtml(data: CardData): void {
     tagline,
     primaryColor,
     secondaryColor,
-    logoUrl,
   } = data;
 
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-  // 상대 경로인 경우 현재 origin 기반 절대 URL로 변환
-  const resolvedLogoUrl = logoUrl
-    ? logoUrl.startsWith('http') || logoUrl.startsWith('data:')
-      ? logoUrl
-      : `${window.location.origin}${logoUrl.startsWith('/') ? '' : '/'}${logoUrl}`
-    : null;
 
   const html = `<!DOCTYPE html>
 <html lang="ko">
