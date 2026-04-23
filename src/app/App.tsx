@@ -4,6 +4,57 @@ import { BusinessCardForm } from './components/BusinessCardForm';
 import { BusinessCardPreview } from './components/BusinessCardPreview';
 import PreviewPage from './pages/PreviewPage';
 
+/**
+ * 한국 전화번호 자동 포맷터
+ * - 숫자만 추출 후 번호 체계에 맞게 하이픈 삽입
+ * - 02 (서울): 2-3-4 (9자리) / 2-4-4 (10자리)
+ * - 010: 3-4-4 (11자리)
+ * - 011/016~019: 3-3-4 (10자리)
+ * - 0XX (지역번호): 3-3-4 (10자리) / 3-4-4 (11자리)
+ * - 0X0 (대표번호, 15XX): 4-4 (8자리)
+ */
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 11);
+  const d = digits;
+  const n = d.length;
+  if (n === 0) return '';
+
+  // 서울 지역번호 (02)
+  if (d.startsWith('02')) {
+    if (n <= 2) return d;
+    if (n <= 5) return `${d.slice(0, 2)}-${d.slice(2)}`;
+    // 9자리(02-XXX-XXXX) vs 10자리(02-XXXX-XXXX)
+    if (n <= 9) return `${d.slice(0, 2)}-${d.slice(2, 5)}-${d.slice(5)}`;
+    return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6, 10)}`;
+  }
+
+  // 010 (3-4-4)
+  if (d.startsWith('010')) {
+    if (n <= 3) return d;
+    if (n <= 7) return `${d.slice(0, 3)}-${d.slice(3)}`;
+    return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
+  }
+
+  // 011 / 016~019 구형 휴대폰 (3-3-4)
+  if (/^01[1-9]/.test(d)) {
+    if (n <= 3) return d;
+    if (n <= 6) return `${d.slice(0, 3)}-${d.slice(3)}`;
+    return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6, 10)}`;
+  }
+
+  // 기타 지역번호 0XX (031, 032 … 070 등)
+  // 10자리: 3-3-4 / 11자리: 3-4-4
+  if (d.startsWith('0')) {
+    if (n <= 3) return d;
+    if (n <= 6) return `${d.slice(0, 3)}-${d.slice(3)}`;
+    if (n <= 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+    return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
+  }
+
+  // 그 외 (숫자 그대로)
+  return d;
+}
+
 // 기본 폼 데이터
 const DEFAULT_FORM = {
   companyName: 'JB.E 기업지원센터',
@@ -23,7 +74,12 @@ function EditorPage() {
   const [formData, setFormData] = useState(DEFAULT_FORM);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'phone') {
+      // 숫자만 추출 후 포맷팅 (삭제 시 자연스럽게 동작)
+      setFormData(prev => ({ ...prev, phone: formatPhone(value) }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   useEffect(() => {
