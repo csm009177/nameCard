@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { toPng, toJpeg } from "html-to-image";
 import jsPDF from "jspdf";
 import { exportToHtml } from "../utils/exportToHtml";
+import { saveCard } from "../utils/shareCard";
 
 interface BusinessCardPreviewProps {
   formData: {
@@ -198,21 +199,24 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
   };
   // ─────────────────────────────────────────────────────────────────────────
 
-  // ─── 로컬 스토리지 저장 & 공유 URL 복사 ──────────────────────────────────
+  // ─── Supabase 저장 & 공유 URL 복사 ──────────────────────────────────────
   const doShare = async () => {
-    const id = Date.now().toString();
-    localStorage.setItem(`namecard_${id}`, JSON.stringify(formData));
-    setSavedId(id);
-    const url = `${window.location.origin}/preview/${id}`;
     try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // clipboard API 실패 시 수동 복사 안내
-      prompt("아래 URL을 복사하세요:", url);
-      return;
+      const id = await saveCard(formData);
+      setSavedId(id);
+      const url = `${window.location.origin}/preview/${id}`;
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        prompt("아래 URL을 복사하세요:", url);
+        return;
+      }
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 3000);
+    } catch (err) {
+      alert('저장에 실패했습니다. Supabase 환경변수를 확인해주세요.');
+      console.error(err);
     }
-    setShareState('copied');
-    setTimeout(() => setShareState('idle'), 3000);
   };
   // ─────────────────────────────────────────────────────────────────────────
 

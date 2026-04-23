@@ -1,40 +1,51 @@
 import { BusinessCardPreview } from '../components/BusinessCardPreview';
 import { useState, useEffect } from 'react';
-import { Share2, Check } from 'lucide-react';
+import { Share2, Check, AlertCircle } from 'lucide-react';
+import { fetchCard, saveCard, CardData } from '../utils/shareCard';
 
 export default function PreviewPage() {
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<CardData | null>(null);
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const path = window.location.pathname;
-    const id = path.split('/preview/')[1];
-    if (id) {
-      const data = localStorage.getItem(`namecard_${id}`);
-      if (data) {
-        setFormData(JSON.parse(data));
-      }
-    }
+    const id = window.location.pathname.split('/preview/')[1];
+    if (!id) { setError(true); return; }
+    fetchCard(id).then(data => {
+      if (data) setFormData(data);
+      else setError(true);
+    });
   }, []);
 
   const doSaveAsMine = async () => {
     if (!formData) return;
-    const id = Date.now().toString();
-    localStorage.setItem(`namecard_${id}`, JSON.stringify(formData));
-    setSavedId(id);
-    const url = `${window.location.origin}/preview/${id}`;
     try {
-      await navigator.clipboard.writeText(url);
+      const id = await saveCard(formData);
+      setSavedId(id);
+      const url = `${window.location.origin}/preview/${id}`;
+      try { await navigator.clipboard.writeText(url); }
+      catch { prompt("아래 URL을 복사하세요:", url); return; }
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 3000);
     } catch {
-      prompt("아래 URL을 복사하세요:", url);
-      return;
+      alert('저장에 실패했습니다.');
     }
-    setShareState('copied');
-    setTimeout(() => setShareState('idle'), 3000);
   };
 
-  if (!formData) return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>;
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-gray-500">
+      <AlertCircle size={40} className="text-red-400" />
+      <p className="text-lg font-semibold">명함을 찾을 수 없습니다.</p>
+      <p className="text-sm">링크가 만료되었거나 잘못된 주소입니다.</p>
+    </div>
+  );
+
+  if (!formData) return (
+    <div className="min-h-screen flex items-center justify-center text-gray-400">
+      명함 불러오는 중...
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
