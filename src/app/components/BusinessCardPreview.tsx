@@ -39,6 +39,7 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
   const [recordProgress, setRecordProgress] = useState(0);
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle');
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [cardScale, setCardScale] = useState(1);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,17 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
     return () => clearTimeout(t);
+  }, []);
+
+  // 카드 너비 감지 → 내부 콘텐츠 스케일 계산 (기준 672px)
+  useEffect(() => {
+    if (!cardRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      const w = entries[0].contentRect.width;
+      setCardScale(w / 672);
+    });
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // 드롭다운 외부 클릭 닫기
@@ -354,8 +366,18 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
             borderRadius: "inherit",
           }}
         />
-        {/* 카드 본문 */}
-        <div className="absolute inset-0 p-8 flex flex-col">
+        {/* 카드 본문 — 기준 672px 기준으로 렌더 후 scale 축소 */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0, left: 0,
+            width: 672,
+            height: 424,
+            transform: `scale(${cardScale})`,
+            transformOrigin: "top left",
+          }}
+          className="p-8 flex flex-col"
+        >
           <CardBody />
         </div>
       </div>
