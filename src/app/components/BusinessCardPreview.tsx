@@ -319,11 +319,11 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
 
       {/* 하단 태그라인 */}
       <div
-        className="absolute bottom-0 left-0 right-0 p-6"
+        className="absolute bottom-0 left-0 right-0 p-4"
         style={{ backgroundColor: formData.primaryColor }}
       >
         <div className="flex items-center space-x-3">
-          <span className="text-3xl" style={{ display: "inline-block", transform: isHovered ? "translateX(6px)" : "translateX(0)", transition: "transform 0.3s" }}>👉</span>
+          <span className="text-2xl" style={{ display: "inline-block", transform: isHovered ? "translateX(6px)" : "translateX(0)", transition: "transform 0.3s" }}>👉</span>
           <span className="text-xl font-semibold" style={{ color: formData.secondaryColor }}>
             {formData.tagline || "서비스 설명을 입력하세요"}
           </span>
