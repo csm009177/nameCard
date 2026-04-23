@@ -1,3 +1,5 @@
+import { supabase } from '../../lib/supabase';
+
 export interface CardData {
   companyName: string;
   companySubtitle: string;
@@ -13,9 +15,9 @@ export interface CardData {
 }
 
 export function exportToHtml(data: CardData): void {
-  // 로고를 Base64로 변환 후 HTML 생성
+  // 로고를 Base64로 변환 후 HTML 생성·업로드
   _fetchLogoBase64(data.logoUrl).then((logoBase64) => {
-    _buildAndDownload(data, logoBase64);
+    _buildAndExport(data, logoBase64);
   });
 }
 
@@ -41,7 +43,7 @@ async function _fetchLogoBase64(logoUrl?: string): Promise<string | null> {
   }
 }
 
-function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void {
+function _buildAndExport(data: CardData, resolvedLogoUrl: string | null): void {
   const {
     companyName,
     companySubtitle,
@@ -352,11 +354,68 @@ function _buildAndDownload(data: CardData, resolvedLogoUrl: string | null): void
 </html>`;
 
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${data.name || "명함"}_디지털명함.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const fileName = `${data.name || "명함"}_디지털명함_${Date.now()}.html`;
+
+  /** 모바일 여부 (터치 기기 또는 좁은 화면) */
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || window.matchMedia('(pointer: coarse)').matches;
+
+  /** 공개 URL을 열거나 복사해서 사용자에게 제공 */
+  const _sharePublicUrl = (publicUrl: string) => {
+    if (navigator.share) {
+      // Web Share API 지원 기기 (Android Chrome, iOS Safari 등)
+      navigator.share({ title: `${data.name} 디지털 명함`, url: publicUrl }).catch(() => {
+        _fallbackPrompt(publicUrl);
+      });
+    } else if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(publicUrl).then(() => {
+        alert('📋 HTML 파일 링크가 클립보드에 복사되었습니다!\n카카오톡·문자 등에 붙여넣어 공유하세요.');
+      }).catch(() => {
+        _fallbackPrompt(publicUrl);
+      });
+    } else {
+      _fallbackPrompt(publicUrl);
+    }
+  };
+
+  const _fallbackPrompt = (publicUrl: string) => {
+    const msg = 'HTML 파일 링크를 복사하여 공유하세요:';
+    prompt(msg, publicUrl);
+  };
+
+  /** Supabase Storage에 업로드 후 공개 URL 반환 */
+  const _uploadToStorage = async (): Promise<string | null> => {
+    const { error } = await supabase.storage
+      .from('exports')
+      .upload(fileName, blob, { contentType: 'text/html;charset=utf-8', upsert: true });
+    if (error) {
+      console.error('[exportToHtml] Storage 업로드 실패:', error.message);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from('exports').getPublicUrl(fileName);
+    return urlData?.publicUrl ?? null;
+  };
+
+  if (isMobile) {
+    // 모바일: 로컬 다운로드 불가 → Supabase 업로드 후 공유
+    _uploadToStorage().then((publicUrl) => {
+      if (publicUrl) {
+        _sharePublicUrl(publicUrl);
+      } else {
+        alert('파일 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    });
+  } else {
+    // 데스크탑: 로컬 다운로드 실행 + 백그라운드 업로드 (공유 URL 생성)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // 백그라운드 업로드 (에러가 나도 다운로드에 영향 없음)
+    _uploadToStorage().catch(() => {});
+  }
 }
 
