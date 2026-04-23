@@ -26,34 +26,49 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 파일을 Base64로 변환 (로컬 폴백용)
+    const toBase64 = (f: File): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(f);
+      });
+
     try {
-      // 고유한 파일명 생성
+      // Supabase Storage 업로드 시도
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `logos/${fileName}`;
 
-      // Supabase Storage에 업로드
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('logos')
         .upload(filePath, file);
 
-      if (error) {
-        console.error('로고 업로드 실패:', error);
-        alert('로고 업로드에 실패했습니다.');
-        return;
+      if (!error) {
+        // 업로드 성공 → 공개 URL 사용
+        const { data: urlData } = supabase.storage
+          .from('logos')
+          .getPublicUrl(filePath);
+        if (urlData?.publicUrl) {
+          onChange('logoUrl', urlData.publicUrl);
+          return;
+        }
       }
 
-      // 공개 URL 가져오기
-      const { data: urlData } = supabase.storage
-        .from('logos')
-        .getPublicUrl(filePath);
-
-      if (urlData?.publicUrl) {
-        onChange('logoUrl', urlData.publicUrl);
+      // Supabase 실패 시 → Base64로 로컬 저장 (오프라인/정책 문제 대응)
+      console.warn('[Logo] Supabase 업로드 실패, Base64 폴백 사용:', error?.message);
+      const base64 = await toBase64(file);
+      onChange('logoUrl', base64);
+    } catch (err) {
+      // 완전 실패 시에도 Base64 폴백
+      console.error('[Logo] 업로드 오류, Base64 폴백:', err);
+      try {
+        const base64 = await toBase64(file);
+        onChange('logoUrl', base64);
+      } catch {
+        alert('로고 이미지를 불러올 수 없습니다.');
       }
-    } catch (error) {
-      console.error('로고 업로드 중 오류:', error);
-      alert('로고 업로드 중 오류가 발생했습니다.');
     }
   };
 
@@ -104,6 +119,7 @@ export function BusinessCardForm({ formData, onChange }: BusinessCardFormProps) 
             type="file"
             accept="image/*"
             className="hidden"
+            title="로고 이미지 선택"
             onChange={handleLogoChange}
           />
         </div>

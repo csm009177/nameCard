@@ -287,7 +287,7 @@ export function BusinessCardPreview({ formData, isPreviewMode = false }: Busines
       </div>
 
       {/* 연락처 */}
-      <div className="flex-1 flex flex-col justify-center space-y-3 pb-16">
+      <div className="flex-1 flex flex-col justify-center space-y-3 pb-24">
         <div className="text-right mb-4">
           <p className="text-gray-600 text-sm mb-1">{formData.title || "직책"}</p>
           <p className="text-3xl font-bold" style={{ color: formData.primaryColor }}>
